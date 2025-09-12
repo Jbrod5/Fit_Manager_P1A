@@ -8,6 +8,8 @@ CREATE TABLE tipo_sucursal(
     tipo STRING NOT NULL UNIQUE
 );
 
+INSERT INTO tipo_sucursal(tipo) VALUES ("Bodega");
+INSERT INTO tipo_sucursal(tipo) VALUES ("Gimnasio");
 
 CREATE TABLE sucursal(
     id_sucursal INTEGER PRIMARY KEY, 
@@ -54,6 +56,12 @@ CREATE TABLE rol_empleado(
     id_rol_empleado INTEGER PRIMARY KEY, 
     nombre_rol VARCHAR(100) NOT NULL UNIQUE
 );
+INSERT INTO rol_empleado(nombre_rol) VALUES ("Administrador");
+INSERT INTO rol_empleado(nombre_rol) VALUES ("Inventario");
+INSERT INTO rol_empleado(nombre_rol) VALUES ("Recepcionista");
+INSERT INTO rol_empleado(nombre_rol) VALUES ("Entrenador");
+
+
 
 CREATE TABLE empleado (
     id_empleado SERIAL PRIMARY KEY,
@@ -84,6 +92,10 @@ CREATE TABLE tipo_membresia_cliente(
     nombre_membresia VARCHAR(100) NOT NULL UNIQUE,
     porcentaje_desuento INTEGER NOT NULL, -- Indica el porcentajee: 10 = 10%
 );
+INSERT INTO tipo_membresia_cliente(nombre_membresia, porcentaje_desuento) VALUES ("Basica",0);
+INSERT INTO tipo_membresia_cliente(nombre_membresia, porcentaje_desuento) VALUES ("Premium",10);
+INSERT INTO tipo_membresia_cliente(nombre_membresia, porcentaje_desuento) VALUES ("VIP",20);
+
 CREATE TABLE membresia_cliente(
     id_membresia_cliente INTEGER PRIMARY KEY, 
     id_cliente INTEGER REFERENCES cliente(id_cliente),
