@@ -33,7 +33,7 @@ CREATE TABLE inventario (
   id_equipo INT REFERENCES equipo(id_equipo) ON DELETE CASCADE,
   id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE,
   cantidad INT NOT NULL CHECK (cantidad >= 0)
-);
+); -- No sería mejor que la llave primaria sea la sucursal y el equipo???
 
 CREATE TABLE transferencia_equipo (
   id_transferencia SERIAL PRIMARY KEY,
@@ -100,7 +100,7 @@ CREATE TABLE membresia_cliente(
 
 -- Asignación entrenador :3
 CREATE TABLE asignacion_entrenador( -- Al hacer el insert verificar que el rol del empleado sea entrenador 
-    id_cliente INT REFERENCES cliente(id_cliente) UNIQUE NOT NULL PRIMARY KEY -- Porque un cliente solo puede tener un entrenador ,
+    id_cliente INT REFERENCES cliente(id_cliente) UNIQUE NOT NULL PRIMARY KEY, -- Porque un cliente solo puede tener un entrenador ,
     id_entrenador INT REFERENCES empleado(id_empleado) NOT NULL
 );
 
