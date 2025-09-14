@@ -100,14 +100,13 @@ CREATE TABLE membresia_cliente(
 
 -- Asignación entrenador :3
 CREATE TABLE asignacion_entrenador( -- Al hacer el insert verificar que el rol del empleado sea entrenador 
-    id_asignacion SERIAL PRIMARY KEY, 
-    id_cliente INT REFERENCES cliente(id_cliente) UNIQUE NOT NULL,
+    id_cliente INT REFERENCES cliente(id_cliente) UNIQUE NOT NULL PRIMARY KEY -- Porque un cliente solo puede tener un entrenador ,
     id_entrenador INT REFERENCES empleado(id_empleado) NOT NULL
 );
 
 CREATE TABLE historial_asignaciones_entrenador(
-    id_historial_asignacion_entrenador SERIAL PRIMARY KEY, 
-    id_cliente INT REFERENCES cliente(id_cliente) NOT NULL,
+    id_historial_asignaciones_entrenador SERIAL PRIMARY KEY,
+    id_cliente INT REFERENCES cliente(id_cliente) NOT NULL,  
     id_entrenador INT REFERENCES empleado(id_empleado) NOT NULL,
     fecha_asignacion DATE NOT NULL
 );
@@ -150,9 +149,9 @@ CREATE TABLE ejercicio_rutina(
 
 -- Planes clientes (define las rutinas que tienen los clientes :3)
 CREATE TABLE rutina_cliente(
-    id_rutina_cliente SERIAL PRIMARY KEY, 
     id_cliente INT REFERENCES cliente(id_cliente),
-    id_rutina INT REFERENCES rutina(id_rutina)
+    id_rutina INT REFERENCES rutina(id_rutina), 
+    PRIMARY KEY (id_cliente, id_rutina)
 );
 
 
@@ -167,3 +166,4 @@ CREATE TABLE pago (
     tipo_servicio VARCHAR(50),
     descripcion TEXT
 );
+
