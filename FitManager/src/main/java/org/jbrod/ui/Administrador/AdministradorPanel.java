@@ -68,4 +68,10 @@ public class AdministradorPanel extends JPanel {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         cl.show(contentPanel, name);
     }
+
+
+    public JPanel getContentPanel() {
+        return contentPanel;
+    }
+
 }

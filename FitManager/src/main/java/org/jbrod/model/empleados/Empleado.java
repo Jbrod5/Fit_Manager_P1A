@@ -17,6 +17,12 @@ public class Empleado {
     private String password;
 
 
+
+    //opcionales
+    private String nombreRol;
+    private String nombreSucursal;
+
+
     public Empleado(int id_empleado, int id_sucursal, String nombre, String correo, int telefono, RolEmpleado rolEmpleado, String usuario, String password) {
         this.id_empleado = id_empleado;
         this.id_sucursal = id_sucursal;
@@ -38,6 +44,16 @@ public class Empleado {
         this.usuario = usuario;
         this.password = password;
     }
+
+
+    public void setNombreRol(String nombreRol) {
+        this.nombreRol = nombreRol;
+    }
+
+    public void setNombreSucursal(String nombreSucursal) {
+        this.nombreSucursal = nombreSucursal;
+    }
+
 
 
 
@@ -77,6 +93,14 @@ public class Empleado {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getNombreRol() {
+        return nombreRol;
+    }
+
+    public String getNombreSucursal() {
+        return nombreSucursal;
     }
 
 

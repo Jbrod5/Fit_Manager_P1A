@@ -22,7 +22,28 @@ public class EmpleadosPanel extends JPanel {
 
         // === Botón nuevo empleado ===
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnNuevoEmpleado = new JButton("➕ Nuevo empleado");
+        btnNuevoEmpleado = new JButton("Nuevo empleado");
+        btnNuevoEmpleado.addActionListener(e -> {
+            Container parent = EmpleadosPanel.this.getParent(); // debería ser contentPanel
+            while (parent != null && !(parent instanceof AdministradorPanel)) {
+                parent = parent.getParent();
+            }
+
+            if (parent != null) {
+                AdministradorPanel adminPanel = (AdministradorPanel) parent;
+
+                // Crear el panel de nuevo empleado y agregarlo a contentPanel si no existe
+                NuevoEmpleadoPanel nuevoPanel = new NuevoEmpleadoPanel(adminPanel, EmpleadosPanel.this);
+                adminPanel.getContentPanel().add(nuevoPanel, "NuevoEmpleado");
+
+                // Mostrar el panel de nuevo empleado
+                CardLayout cl = (CardLayout) adminPanel.getContentPanel().getLayout();
+                cl.show(adminPanel.getContentPanel(), "NuevoEmpleado");
+            } else {
+                JOptionPane.showMessageDialog(null, "No se pudo abrir el panel de nuevo empleado.");
+            }
+        });
+
         topPanel.add(btnNuevoEmpleado);
         add(topPanel, BorderLayout.NORTH);
 
@@ -47,7 +68,7 @@ public class EmpleadosPanel extends JPanel {
         add(new JScrollPane(tablaEmpleados), BorderLayout.CENTER);
     }
 
-    private void cargarEmpleados() {
+    public void cargarEmpleados() {
         try {
             List<Empleado> empleados = empleadoDB.obtenerTodos(); // método en tu DAO
             modeloTabla.setRowCount(0); // limpiar
@@ -56,8 +77,8 @@ public class EmpleadosPanel extends JPanel {
                         emp.getId_empleado(),
                         emp.getNombre(),
                         emp.getUsuario(),
-                        emp.getRolEmpleadoInt(),
-                        emp.getId_sucursal(),
+                        emp.getNombreRol(),
+                        emp.getNombreSucursal(),
                         "Editar",
                         "Eliminar"
                 });
@@ -142,5 +163,6 @@ public class EmpleadosPanel extends JPanel {
             clicked = false;
             return super.stopCellEditing();
         }
+
     }
 }
