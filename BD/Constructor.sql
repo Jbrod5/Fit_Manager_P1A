@@ -64,7 +64,7 @@ CREATE TABLE empleado (
     id_sucursal INT REFERENCES sucursal(id_sucursal),
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(100) UNIQUE,
-    telefono VARCHAR(15),
+    telefono INT NOT NULL,
     rol INT REFERENCES rol_empleado(id_rol_empleado),
     usuario VARCHAR(50) UNIQUE,
     passwrd VARCHAR(100)
