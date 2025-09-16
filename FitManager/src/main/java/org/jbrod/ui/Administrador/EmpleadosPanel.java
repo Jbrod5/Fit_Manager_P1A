@@ -1,0 +1,146 @@
+package org.jbrod.ui.Administrador;
+
+import org.jbrod.controller.EmpleadoDB;
+import org.jbrod.model.empleados.Empleado;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+public class EmpleadosPanel extends JPanel {
+
+    private JTable tablaEmpleados;
+    private DefaultTableModel modeloTabla;
+    private JButton btnNuevoEmpleado;
+    private EmpleadoDB empleadoDB;  // DAO para traer empleados
+
+    public EmpleadosPanel() {
+        setLayout(new BorderLayout());
+
+        empleadoDB = new EmpleadoDB();
+
+        // === Botón nuevo empleado ===
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnNuevoEmpleado = new JButton("➕ Nuevo empleado");
+        topPanel.add(btnNuevoEmpleado);
+        add(topPanel, BorderLayout.NORTH);
+
+        // === Tabla de empleados ===
+        String[] columnas = {"ID", "Nombre", "Usuario", "Rol", "Sucursal", "Editar", "Eliminar"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 5 || column == 6;
+            }
+        };
+
+        tablaEmpleados = new JTable(modeloTabla);
+        tablaEmpleados.setRowHeight(30);
+
+        // === Cargar empleados desde la BD ===
+        cargarEmpleados();
+
+        // === Renderizar botones en la tabla ===
+        agregarBotones();
+
+        add(new JScrollPane(tablaEmpleados), BorderLayout.CENTER);
+    }
+
+    private void cargarEmpleados() {
+        try {
+            List<Empleado> empleados = empleadoDB.obtenerTodos(); // método en tu DAO
+            modeloTabla.setRowCount(0); // limpiar
+            for (Empleado emp : empleados) {
+                modeloTabla.addRow(new Object[]{
+                        emp.getId_empleado(),
+                        emp.getNombre(),
+                        emp.getUsuario(),
+                        emp.getRolEmpleadoInt(),
+                        emp.getId_sucursal(),
+                        "Editar",
+                        "Eliminar"
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar empleados: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void agregarBotones() {
+        tablaEmpleados.getColumn("Editar").setCellRenderer(new BotonRenderer());
+        tablaEmpleados.getColumn("Eliminar").setCellRenderer(new BotonRenderer());
+
+        tablaEmpleados.getColumn("Editar").setCellEditor(new BotonEditor(new JCheckBox(), "Editar"));
+        tablaEmpleados.getColumn("Eliminar").setCellEditor(new BotonEditor(new JCheckBox(), "Eliminar"));
+    }
+
+    // === Botón renderer ===
+    class BotonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
+        public BotonRenderer() {
+            setOpaque(true);
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    // === Botón editor ===
+    class BotonEditor extends DefaultCellEditor {
+        private String label;
+        private JButton button;
+        private boolean clicked;
+
+        public BotonEditor(JCheckBox checkBox, String tipo) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+            this.label = tipo;
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                                                     boolean isSelected, int row, int column) {
+            button.setText(label);
+            clicked = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (clicked) {
+                int fila = tablaEmpleados.getSelectedRow();
+                int id = (int) modeloTabla.getValueAt(fila, 0);
+
+                if ("Editar".equals(label)) {
+                    JOptionPane.showMessageDialog(null, "Editar empleado con ID: " + id);
+                } else if ("Eliminar".equals(label)) {
+                    int confirm = JOptionPane.showConfirmDialog(null,
+                            "¿Seguro que deseas eliminar al empleado con ID: " + id + "?",
+                            "Confirmar eliminación",
+                            JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        empleadoDB.eliminar(id); // eliminar en BD
+                        cargarEmpleados(); // refrescar tabla
+                    }
+                }
+            }
+            clicked = false;
+            return label;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            clicked = false;
+            return super.stopCellEditing();
+        }
+    }
+}

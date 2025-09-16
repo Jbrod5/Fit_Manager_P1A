@@ -1,4 +1,4 @@
-## Instalacion de dependencias - - - - - - - - - - - - -
+## Instalacion de dependencias 
 #### 1. PostgreSQL (Version 17.6)
 Para Solus usando dpkg: 
 ```sh 
@@ -40,7 +40,18 @@ Puede instalarse ejecutando:
 sudo pip install psycopg2-binary
 ```
 
-## Ejecucion del sistema 😼 - - - - - - - - - - - - -
+
+#### 3. Java 21 - JDK 21.0.8 
+Para el desarrollo de la aplicación de escritorio se utilizó Java como lenguaje de programación con el kit de desarrollo Temurin JDK 21.0.8 y se definió la versión 21 de java para el compilador.
+
+
+
+
+
+
+
+
+## Ejecucion del sistema 😼
 
 #### 1. PostgreSQL:
 1.1 Iniciando el servicio de PostgreSQL: 
@@ -73,7 +84,14 @@ sudo ./loaeder.sh # en el mismo directorio donde se encuenrtra el script
 
 
 
-## Herramientas que me hacen la vida más fácil :3 - - - - - - - - - - - - -
+
+
+
+
+
+
+
+## Herramientas que me hacen la vida más fácil :3
 
 #### BeeKeeper Studio
 Beekeeper es un cliente SQL para visualizar y editar datos compatible con muchos gestores de bases de datos y sistemas operativos.
