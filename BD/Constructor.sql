@@ -67,7 +67,7 @@ CREATE TABLE empleado (
     telefono INT NOT NULL,
     rol INT REFERENCES rol_empleado(id_rol_empleado),
     usuario VARCHAR(50) UNIQUE,
-    passwrd VARCHAR(100)
+    passwrd VARCHAR(250)
 );
 
 

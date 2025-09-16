@@ -18,6 +18,7 @@ import random
 import datetime
 from faker import Faker
 import psycopg2
+import base64
 
 # Faker en español (genera nombres y todo eso en español asdjlka)
 falso = Faker('es_ES')
@@ -114,6 +115,12 @@ def crear_equipos_inventario(cur, sucursales):
                         (id_eq, id_suc, cantidad))
 
 
+
+def encrypt(usuario, password):
+    a_encriptar = f"{usuario}salttt{password}"
+    return base64.b64encode(a_encriptar.encode("utf-8")).decode("utf-8")
+
+
 def crear_empleados(cur, sucursales):
     cur.execute("SELECT id_rol_empleado, nombre_rol FROM rol_empleado")
     roles = {r[1]: r[0] for r in cur.fetchall()}
@@ -123,7 +130,7 @@ def crear_empleados(cur, sucursales):
         "INSERT INTO empleado (id_sucursal, nombre, correo, telefono, rol, usuario, passwrd) "
         "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id_empleado",
         (sucursales['Central'], 'Administrador Principal', 'admin@fitmanager.com', 0,
-         roles['Administrador'], 'admin', 'admin123')
+         roles['Administrador'], 'admin', encrypt('admin', 'admin123'))
     )
 
     # Resto de empleados
@@ -133,11 +140,12 @@ def crear_empleados(cur, sucursales):
                 nombre = falso.name()
                 usuario = f"{nombre.split()[0].lower()}_{suc}_{i}"
                 correo = usuario + random.choice(DOMINIOS)
-                telefono = random.randint(20000000, 79999999)  # teléfono guatemalteco de 8 dígitos
+                telefono = random.randint(20000000, 79999999)  # teléfono de 8 digitos :3
+                pass_encriptada = encrypt(usuario, 'pass123')
                 cur.execute(
                     "INSERT INTO empleado (id_sucursal, nombre, correo, telefono, rol, usuario, passwrd) "
                     "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id_empleado",
-                    (sucursales[suc], nombre, correo, telefono, roles[rol], usuario, 'pass123')
+                    (sucursales[suc], nombre, correo, telefono, roles[rol], usuario, pass_encriptada)
                 )
 
 
