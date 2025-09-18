@@ -226,4 +226,51 @@ public class InventarioDB {
 
         return data;
     }
+
+
+
+
+
+    public static boolean agregarEquipoEnSucursal(String nombre, String descripcion, String sucursal, int cantidad) {
+        String sqlInsertEquipo = "INSERT INTO equipo (nombre, descripcion) VALUES (?, ?)";
+        String sqlInsertInventario = "INSERT INTO inventario (id_equipo, id_sucursal, cantidad) VALUES (?, ?, ?)";
+
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+
+            // Insertar equipo
+            int idEquipo;
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsertEquipo, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, nombre);
+                ps.setString(2, descripcion);
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        idEquipo = rs.getInt(1);
+                    } else {
+                        throw new SQLException("No se pudo obtener el ID del equipo");
+                    }
+                }
+            }
+
+            // Obtener id de sucursal elegida
+            int idSucursal = obtenerIdSucursal(sucursal, conn);
+
+            // Insertar inventario
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsertInventario)) {
+                ps.setInt(1, idEquipo);
+                ps.setInt(2, idSucursal);
+                ps.setInt(3, cantidad);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
