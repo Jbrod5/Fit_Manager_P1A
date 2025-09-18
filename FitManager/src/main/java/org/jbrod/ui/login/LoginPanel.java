@@ -6,7 +6,7 @@ import org.jbrod.model.empleados.RolEmpleadoEnum;
 import org.jbrod.ui.Administrador.AdministradorPanel;
 import org.jbrod.ui.Entrenador.EntrenadorPanel;
 import org.jbrod.ui.Inventario.InventarioPanel;
-import org.jbrod.ui.Recepcionista.RecepcionistaPanel;
+import org.jbrod.ui.recepcionista.RecepcionistaPanel;
 import org.jbrod.ui.VentanaPrincipal;
 
 import javax.swing.*;
@@ -102,6 +102,9 @@ public class LoginPanel extends JPanel{
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error al conectarse con la base de datos");
+        } catch (NullPointerException n){
+            JOptionPane.showMessageDialog(this, "Credenciales invalidas.");
+
         }
     }
 

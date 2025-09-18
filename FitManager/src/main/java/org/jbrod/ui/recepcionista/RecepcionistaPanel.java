@@ -1,6 +1,8 @@
-package org.jbrod.ui.Administrador;
+package org.jbrod.ui.recepcionista;
 
 import org.jbrod.model.empleados.Empleado;
+import org.jbrod.ui.Administrador.EmpleadosPanel;
+import org.jbrod.ui.Administrador.InventarioPanel;
 import org.jbrod.ui.VentanaPrincipal;
 import org.jbrod.ui.login.LoginPanel;
 
@@ -8,16 +10,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class AdministradorPanel extends JPanel {
+public class RecepcionistaPanel extends JPanel {
 
     private Empleado emp;
     private VentanaPrincipal ventanaPrincipal;
 
     private JPanel contentPanel; // aquí irán las vistas dinámicas
 
-    public AdministradorPanel(Empleado emp, VentanaPrincipal ventanaPrincipal) {
+
+
+    public RecepcionistaPanel(Empleado emp, VentanaPrincipal ventanaPrincipal){
         this.emp = emp;
         this.ventanaPrincipal = ventanaPrincipal;
+
+
 
         setLayout(new BorderLayout());
 
@@ -27,13 +33,15 @@ public class AdministradorPanel extends JPanel {
 
         // 🔹 Panel con botones de navegación (lado izquierdo)
         JPanel navButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnDashboard = new JButton("Dashboard");
-        JButton btnEmpleados = new JButton("Empleados");
-        JButton btnInventario = new JButton("Inventario");
+        JButton btnClientes = new JButton("Clientes");
+        JButton btnMembresias = new JButton("Membresias");
+        JButton btnAsistencias = new JButton("Asistencias");
+        JButton btnPagos = new JButton("Pagos");
 
-        navButtons.add(btnDashboard);
-        navButtons.add(btnEmpleados);
-        navButtons.add(btnInventario);
+        navButtons.add(btnClientes);
+        navButtons.add(btnMembresias);
+        navButtons.add(btnAsistencias);
+        navButtons.add(btnPagos);
 
         // 🔹 Botón de cerrar sesión (lado derecho)
         JButton btnCerrarSesion = new JButton("Cerrar sesión");
@@ -43,15 +51,18 @@ public class AdministradorPanel extends JPanel {
 
         // 🔹 Contenedor central con CardLayout
         contentPanel = new JPanel(new CardLayout());
-        contentPanel.add(new JLabel("Bienvenido administrador " + emp.getNombre(),
-                SwingConstants.CENTER), "Dashboard");
-        contentPanel.add(new EmpleadosPanel(this), "Empleados");
-        contentPanel.add(new InventarioPanel(this), "Inventario");
+        contentPanel.add(new JLabel("Bienvenido recepcionista, este es el area de clientes :3 " + emp.getNombre(), SwingConstants.CENTER), "Clientes");
+        contentPanel.add(new JLabel("Bienvenido recepcionista: Membresias" + emp.getNombre(), SwingConstants.CENTER), "Membresias");
+        contentPanel.add(new JLabel("Bienvenido recepcionista: Asistencias" + emp.getNombre(), SwingConstants.CENTER), "Asistencias");
+        contentPanel.add(new JLabel("Bienvenido recepcionista: Pagos" + emp.getNombre(), SwingConstants.CENTER), "Pagos");
+        //contentPanel.add(new EmpleadosPanel(this), "Empleados");
+        //contentPanel.add(new InventarioPanel(this), "Inventario");
 
         // 🔹 Acciones de los botones
-        btnDashboard.addActionListener((ActionEvent e) -> showView("Dashboard"));
-        btnEmpleados.addActionListener((ActionEvent e) -> showView("Empleados"));
-        btnInventario.addActionListener((ActionEvent e) -> showView("Inventario"));
+        btnClientes.addActionListener((ActionEvent e) -> showView("Clientes"));
+        btnMembresias.addActionListener((ActionEvent e) -> showView("Membresias"));
+        btnAsistencias.addActionListener((ActionEvent e) -> showView("Asistencias"));
+        btnPagos.addActionListener((ActionEvent e) -> showView("Pagos"));
 
         btnCerrarSesion.addActionListener((ActionEvent e) -> {
             //JOptionPane.showMessageDialog(this, "Cerrando sesión...");
@@ -62,7 +73,9 @@ public class AdministradorPanel extends JPanel {
         // 🔹 Agregar al panel principal
         add(navBar, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
+
     }
+
 
     private void showView(String name) {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
@@ -78,17 +91,6 @@ public class AdministradorPanel extends JPanel {
 
     }
 
-    public void showInicioEmpleados(){
-        showView("Empleados");
-    }
 
-    public void showInicioInventario(){
-        showView("Inventario");
-    }
-
-
-    public JPanel getContentPanel() {
-        return contentPanel;
-    }
 
 }
