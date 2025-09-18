@@ -28,18 +28,25 @@ CREATE TABLE equipo (
 );
 
 -- control de la cantidad de maquinass 
+--CREATE TABLE inventario (
+--  id_inventario SERIAL PRIMARY KEY,
+--  id_equipo INT REFERENCES equipo(id_equipo) ON DELETE CASCADE,
+--  id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE,
+--  cantidad INT NOT NULL CHECK (cantidad >= 0)
+--); -- No sería mejor que la llave primaria sea la sucursal y el equipo???
 CREATE TABLE inventario (
-  id_inventario SERIAL PRIMARY KEY,
   id_equipo INT REFERENCES equipo(id_equipo) ON DELETE CASCADE,
   id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE,
-  cantidad INT NOT NULL CHECK (cantidad >= 0)
-); -- No sería mejor que la llave primaria sea la sucursal y el equipo???
+  cantidad INT NOT NULL CHECK (cantidad >= 0),
+  PRIMARY KEY (id_equipo, id_sucursal)
+);
+
 
 CREATE TABLE transferencia_equipo (
   id_transferencia SERIAL PRIMARY KEY,
-  id_equipo INT REFERENCES equipo(id_equipo),
-  desde_id_sucursal INT REFERENCES sucursal(id_sucursal),
-  hacia_id_sucursal INT REFERENCES sucursal(id_sucursal),
+  id_equipo INT REFERENCES equipo(id_equipo) ON DELETE CASCADE,
+  desde_id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE,
+  hacia_id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE,
   cantidad INT NOT NULL CHECK (cantidad > 0),
   fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -61,7 +68,7 @@ INSERT INTO rol_empleado (nombre_rol) VALUES ('Entrenador');
 
 CREATE TABLE empleado (
     id_empleado SERIAL PRIMARY KEY,
-    id_sucursal INT REFERENCES sucursal(id_sucursal),
+    id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE,
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(100) UNIQUE,
     telefono INT NOT NULL,
@@ -92,30 +99,30 @@ INSERT INTO tipo_membresia_cliente (nombre_membresia, porcentaje_descuento) VALU
 
 CREATE TABLE membresia_cliente(
     id_membresia_cliente SERIAL PRIMARY KEY, 
-    id_cliente INT REFERENCES cliente(id_cliente),
-    id_tipo_membresia INT REFERENCES tipo_membresia_cliente(id_tipo_membresia),
+    id_cliente INT REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    id_tipo_membresia INT REFERENCES tipo_membresia_cliente(id_tipo_membresia) ON DELETE CASCADE,
     fecha_inicio DATE NOT NULL, 
     fecha_fin DATE NOT NULL
 );
 
 -- Asignación entrenador :3
 CREATE TABLE asignacion_entrenador( -- Al hacer el insert verificar que el rol del empleado sea entrenador 
-    id_cliente INT REFERENCES cliente(id_cliente) UNIQUE NOT NULL PRIMARY KEY, -- Porque un cliente solo puede tener un entrenador ,
-    id_entrenador INT REFERENCES empleado(id_empleado) NOT NULL
+    id_cliente INT REFERENCES cliente(id_cliente)ON DELETE CASCADE UNIQUE NOT NULL PRIMARY KEY, -- Porque un cliente solo puede tener un entrenador ,
+    id_entrenador INT REFERENCES empleado(id_empleado) ON DELETE CASCADE NOT NULL
 );
 
 CREATE TABLE historial_asignaciones_entrenador(
     id_historial_asignaciones_entrenador SERIAL PRIMARY KEY,
-    id_cliente INT REFERENCES cliente(id_cliente) NOT NULL,  
-    id_entrenador INT REFERENCES empleado(id_empleado) NOT NULL,
+    id_cliente INT REFERENCES cliente(id_cliente)ON DELETE CASCADE NOT NULL,  
+    id_entrenador INT REFERENCES empleado(id_empleado) ON DELETE CASCADE NOT NULL,
     fecha_asignacion DATE NOT NULL
 );
 
 -- Asistencias
 CREATE TABLE asistencia(
     id_asistencia SERIAL PRIMARY KEY, 
-    id_cliente INT REFERENCES cliente(id_cliente),
-    id_sucursal INT REFERENCES sucursal(id_sucursal), -- Al insertar verificar que la sucursal sea un gimnasio y no una bodega
+    id_cliente INT REFERENCES cliente(id_cliente)ON DELETE CASCADE,
+    id_sucursal INT REFERENCES sucursal(id_sucursal) ON DELETE CASCADE, -- Al insertar verificar que la sucursal sea un gimnasio y no una bodega
     entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -133,14 +140,14 @@ CREATE TABLE rutina(
     id_rutina SERIAL PRIMARY KEY, 
     nombre_rutina VARCHAR(200), 
     descripcion TEXT, 
-    id_entrenador_creador INT REFERENCES empleado(id_empleado), -- al insertar verificar que sea un entrenador
+    id_entrenador_creador INT REFERENCES empleado(id_empleado) ON DELETE CASCADE, -- al insertar verificar que sea un entrenador
     fecha_creacion DATE DEFAULT CURRENT_DATE
 ); 
 
 CREATE TABLE ejercicio_rutina(
     id_ejercicio_rutina SERIAL PRIMARY KEY, 
-    id_ejercicio INT REFERENCES ejercicio(id_ejercicio) NOT NULL, 
-    id_rutina INT REFERENCES rutina(id_rutina) NOT NULL, 
+    id_ejercicio INT REFERENCES ejercicio(id_ejercicio) ON DELETE CASCADE NOT NULL, 
+    id_rutina INT REFERENCES rutina(id_rutina) ON DELETE CASCADE NOT NULL, 
     numero_series INT NOT NULL, 
     repeticiones INT NOT NULL, 
     duracion_estimada INT, 
@@ -149,8 +156,8 @@ CREATE TABLE ejercicio_rutina(
 
 -- Planes clientes (define las rutinas que tienen los clientes :3)
 CREATE TABLE rutina_cliente(
-    id_cliente INT REFERENCES cliente(id_cliente),
-    id_rutina INT REFERENCES rutina(id_rutina), 
+    id_cliente INT REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    id_rutina INT REFERENCES rutina(id_rutina) ON DELETE CASCADE, 
     PRIMARY KEY (id_cliente, id_rutina)
 );
 
@@ -159,8 +166,8 @@ CREATE TABLE rutina_cliente(
 
 CREATE TABLE pago (
     id_pago SERIAL PRIMARY KEY,
-    id_cliente INT REFERENCES cliente(id_cliente),
-    id_membresia INT REFERENCES membresia_cliente(id_membresia_cliente),
+    id_cliente INT REFERENCES cliente(id_cliente) ON DELETE CASCADE,
+    id_membresia INT REFERENCES membresia_cliente(id_membresia_cliente)ON DELETE CASCADE,
     monto DECIMAL(10,2),
     fecha_pago DATE DEFAULT CURRENT_DATE,
     tipo_servicio VARCHAR(50),

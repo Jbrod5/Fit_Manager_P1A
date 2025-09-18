@@ -45,8 +45,8 @@ public class AdministradorPanel extends JPanel {
         contentPanel = new JPanel(new CardLayout());
         contentPanel.add(new JLabel("Bienvenido administrador " + emp.getNombre(),
                 SwingConstants.CENTER), "Dashboard");
-        contentPanel.add(new EmpleadosPanel(), "Empleados");
-        contentPanel.add(new JLabel("Gestión de inventario aquí", SwingConstants.CENTER), "Inventario");
+        contentPanel.add(new EmpleadosPanel(this), "Empleados");
+        contentPanel.add(new InventarioPanel(this), "Inventario");
 
         // 🔹 Acciones de los botones
         btnDashboard.addActionListener((ActionEvent e) -> showView("Dashboard"));
@@ -67,6 +67,23 @@ public class AdministradorPanel extends JPanel {
     private void showView(String name) {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         cl.show(contentPanel, name);
+    }
+
+
+
+    public void addView(String name, JPanel panel) {
+        contentPanel.add(panel, name);
+        CardLayout cl = (CardLayout) contentPanel.getLayout();
+        cl.show(contentPanel, name);
+
+    }
+
+    public void showInicioEmpleados(){
+        showView("Empleados");
+    }
+
+    public void showInicioInventario(){
+        showView("Inventario");
     }
 
 

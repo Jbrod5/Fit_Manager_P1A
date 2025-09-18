@@ -17,6 +17,7 @@ public class VentanaPrincipal extends JFrame {
 
 
         panelPrincipal = new JPanel(new BorderLayout()); // layout simple
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(0, 15, 15, 15));
         add(panelPrincipal);
 
     }

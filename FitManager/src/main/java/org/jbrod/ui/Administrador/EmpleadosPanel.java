@@ -15,7 +15,10 @@ public class EmpleadosPanel extends JPanel {
     private JButton btnNuevoEmpleado;
     private EmpleadoDB empleadoDB;  // DAO para traer empleados
 
-    public EmpleadosPanel() {
+    private AdministradorPanel administradorPanel;
+
+    public EmpleadosPanel(AdministradorPanel administradorPanel) {
+        this.administradorPanel = administradorPanel;
         setLayout(new BorderLayout());
 
         empleadoDB = new EmpleadoDB();
@@ -70,7 +73,11 @@ public class EmpleadosPanel extends JPanel {
 
     public void cargarEmpleados() {
         try {
-            List<Empleado> empleados = empleadoDB.obtenerTodos(); // método en tu DAO
+            if (tablaEmpleados.isEditing()) {
+                tablaEmpleados.getCellEditor().stopCellEditing();
+            }
+
+            List<Empleado> empleados = empleadoDB.obtenerTodos();
             modeloTabla.setRowCount(0); // limpiar
             for (Empleado emp : empleados) {
                 modeloTabla.addRow(new Object[]{
@@ -90,6 +97,7 @@ public class EmpleadosPanel extends JPanel {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void agregarBotones() {
         tablaEmpleados.getColumn("Editar").setCellRenderer(new BotonRenderer());
@@ -142,8 +150,31 @@ public class EmpleadosPanel extends JPanel {
                 int id = (int) modeloTabla.getValueAt(fila, 0);
 
                 if ("Editar".equals(label)) {
-                    JOptionPane.showMessageDialog(null, "Editar empleado con ID: " + id);
-                } else if ("Eliminar".equals(label)) {
+                    Empleado emp = empleadoDB.obtenerPorId(id);
+
+                    if (emp != null) {
+                        AdministradorPanel adminPanel = null;
+                        Container parent = EmpleadosPanel.this.getParent();
+                        while (parent != null && !(parent instanceof AdministradorPanel)) {
+                            parent = parent.getParent();
+                        }
+                        if (parent != null) {
+                            adminPanel = (AdministradorPanel) parent;
+                        }
+
+                        if (adminPanel != null) {
+                            EditarEmpleadoPanel editarPanel = new EditarEmpleadoPanel(adminPanel, EmpleadosPanel.this, emp);
+                            adminPanel.getContentPanel().add(editarPanel, "EditarEmpleado");
+
+                            CardLayout cl = (CardLayout) adminPanel.getContentPanel().getLayout();
+                            cl.show(adminPanel.getContentPanel(), "EditarEmpleado");
+                        }
+
+                        } else {
+                            JOptionPane.showMessageDialog(null, "No se encontró el empleado.");
+                        }
+
+                    } else if ("Eliminar".equals(label)) {
                     int confirm = JOptionPane.showConfirmDialog(null,
                             "¿Seguro que deseas eliminar al empleado con ID: " + id + "?",
                             "Confirmar eliminación",
@@ -151,7 +182,9 @@ public class EmpleadosPanel extends JPanel {
                     if (confirm == JOptionPane.YES_OPTION) {
                         empleadoDB.eliminar(id); // eliminar en BD
                         cargarEmpleados(); // refrescar tabla
+                        administradorPanel.showInicioEmpleados();
                     }
+
                 }
             }
             clicked = false;

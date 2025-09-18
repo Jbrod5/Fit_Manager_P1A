@@ -1,20 +1,31 @@
 package org.jbrod;
 
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import org.jbrod.ui.VentanaPrincipal;
 import org.jbrod.ui.login.LoginPanel;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+import javax.swing.*;
+
 public class Main {
     public static void main(String[] args) {
+        try {
+            //Establecer el tema FlatLaf Cupertino Light
+            FlatMacLightLaf.setup();
+            UIManager.setLookAndFeel(new FlatMacLightLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
+        // Crear la ventana principal y mostrarla
+        SwingUtilities.invokeLater(() -> {
+            VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
+            ventanaPrincipal.setVisible(true);
 
-        VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
-        ventanaPrincipal.setVisible(true);
-
-        //Lo primero que debe casrgarse es el login :3
-        LoginPanel loginPanel = new LoginPanel(ventanaPrincipal);
-        ventanaPrincipal.cambiarPanel(loginPanel,  "login");
-
+            // 🔹 Cargar el login al inicio
+            LoginPanel loginPanel = new LoginPanel(ventanaPrincipal);
+            ventanaPrincipal.cambiarPanel(loginPanel, "login");
+        });
     }
 }

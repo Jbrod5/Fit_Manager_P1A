@@ -73,6 +73,8 @@ public class LoginPanel extends JPanel{
 
         Autenticar auth = new Autenticar();
         try {
+            System.out.println("Usuario: " +  usuario);
+            System.out.println("Pass: " + contrasena);
             Empleado emp = auth.login(usuario, contrasena);
             // Convertir el int a enum
             RolEmpleadoEnum rolEnum = RolEmpleadoEnum.fromId(emp.getRolEmpleadoInt());
