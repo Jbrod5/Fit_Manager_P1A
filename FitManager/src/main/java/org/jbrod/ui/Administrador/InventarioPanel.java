@@ -59,10 +59,10 @@ public class InventarioPanel extends JPanel {
         inventarioPanel.setLayout(new BoxLayout(inventarioPanel, BoxLayout.Y_AXIS));
         inventarioPanel.add(new JLabel("Equipos registrados:"));
         inventarioPanel.add(scrollEquipos);
-        inventarioPanel.add(Box.createVerticalStrut(10)); // espacio
+        inventarioPanel.add(Box.createVerticalStrut(10));
         inventarioPanel.add(new JLabel("Inventario por sucursal:"));
         inventarioPanel.add(scrollInventario);
-        inventarioPanel.add(Box.createVerticalStrut(10)); // espacio
+        inventarioPanel.add(Box.createVerticalStrut(10));
         inventarioPanel.add(new JLabel("Transferencias realizadas:"));
         inventarioPanel.add(scrollTransferencias);
 
@@ -80,7 +80,6 @@ public class InventarioPanel extends JPanel {
         btnRegistrar.addActionListener(e -> mostrarRegistro());
         btnTransferir.addActionListener(e -> mostrarTransferencia());
 
-        // Armado del panel principal
         add(actionsPanel, BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
 
@@ -93,7 +92,7 @@ public class InventarioPanel extends JPanel {
         cl.show(contentPanel, name);
     }
 
-    // Cargar y recargar equipos, inventario y transferencias
+    // === Método seguro para cargar o recargar todas las tablas ===
     public void cargarDatos() {
         // Limpiar tablas
         equiposModel.setRowCount(0);
@@ -102,30 +101,36 @@ public class InventarioPanel extends JPanel {
 
         // Cargar equipos
         List<Object[]> equipos = InventarioDB.obtenerEquipos();
-        for (Object[] fila : equipos) {
-            equiposModel.addRow(fila);
+        if (equipos != null) {
+            for (Object[] fila : equipos) {
+                if (fila != null) equiposModel.addRow(fila);
+            }
         }
 
         // Cargar inventario
         List<Object[]> inventario = InventarioDB.obtenerInventarioConSucursales();
-        for (Object[] fila : inventario) {
-            inventarioModel.addRow(fila);
+        if (inventario != null) {
+            for (Object[] fila : inventario) {
+                if (fila != null) inventarioModel.addRow(fila);
+            }
         }
 
         // Cargar transferencias
         List<Object[]> transferencias = InventarioDB.obtenerTransferencias();
-        for (Object[] fila : transferencias) {
-            transferenciasModel.addRow(fila);
+        if (transferencias != null) {
+            for (Object[] fila : transferencias) {
+                if (fila != null) transferenciasModel.addRow(fila);
+            }
         }
     }
 
     private void mostrarRegistro() {
         cargarDatos();
-        administradorPanel.addView("Registrar equipo", new AgregarEquipoPanel(administradorPanel));
+        administradorPanel.addView("Registrar equipo", new AgregarEquipoPanel(administradorPanel, this));
     }
 
     private void mostrarTransferencia() {
         cargarDatos();
-        administradorPanel.addView("Registrar transferencia", new TransferenciaEquipoPanel(administradorPanel));
+        administradorPanel.addView("Registrar transferencia", new TransferenciaEquipoPanel(administradorPanel, this));
     }
 }

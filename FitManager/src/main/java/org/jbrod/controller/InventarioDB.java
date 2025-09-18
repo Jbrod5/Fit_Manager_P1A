@@ -8,9 +8,6 @@ import java.util.List;
 
 public class InventarioDB {
 
-    // Conexión única desde el singleton
-    private static final Connection conn = DBConnectionSingleton.getInstance().getConnection();
-
     // === Obtener inventario con sucursales ===
     public static List<Object[]> obtenerInventarioConSucursales() {
         List<Object[]> data = new ArrayList<>();
@@ -22,7 +19,8 @@ public class InventarioDB {
             ORDER BY s.nombre, e.nombre;
         """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -46,7 +44,8 @@ public class InventarioDB {
         List<Object[]> data = new ArrayList<>();
         String sql = "SELECT id_equipo, nombre, descripcion FROM equipo ORDER BY nombre";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
@@ -67,10 +66,13 @@ public class InventarioDB {
     // === Agregar equipo ===
     public static boolean agregarEquipo(String nombre, String descripcion) {
         String sql = "INSERT INTO equipo (nombre, descripcion) VALUES (?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, nombre);
             ps.setString(2, descripcion);
             return ps.executeUpdate() > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -82,11 +84,14 @@ public class InventarioDB {
         List<String> lista = new ArrayList<>();
         String sql = "SELECT nombre FROM equipo ORDER BY nombre";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 lista.add(rs.getString("nombre"));
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -99,11 +104,14 @@ public class InventarioDB {
         List<String> lista = new ArrayList<>();
         String sql = "SELECT nombre FROM sucursal ORDER BY nombre";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 lista.add(rs.getString("nombre"));
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -121,14 +129,14 @@ public class InventarioDB {
             ON CONFLICT (id_equipo, id_sucursal) DO UPDATE SET cantidad = inventario.cantidad + EXCLUDED.cantidad
         """;
 
-        try {
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection()) {
             conn.setAutoCommit(false);
 
             int idEquipo = obtenerIdEquipo(nombreEquipo, conn);
             int idDesde = obtenerIdSucursal(desdeSucursal, conn);
             int idHacia = obtenerIdSucursal(haciaSucursal, conn);
 
-            // 1. Insertar en historial
+            // Insertar en historial
             try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
                 ps.setInt(1, idEquipo);
                 ps.setInt(2, idDesde);
@@ -137,7 +145,7 @@ public class InventarioDB {
                 ps.executeUpdate();
             }
 
-            // 2. Restar inventario origen
+            // Restar inventario origen
             try (PreparedStatement ps = conn.prepareStatement(sqlUpdateOrigen)) {
                 ps.setInt(1, cantidad);
                 ps.setInt(2, idEquipo);
@@ -145,7 +153,7 @@ public class InventarioDB {
                 ps.executeUpdate();
             }
 
-            // 3. Sumar inventario destino
+            // Sumar inventario destino
             try (PreparedStatement ps = conn.prepareStatement(sqlUpdateDestino)) {
                 ps.setInt(1, idEquipo);
                 ps.setInt(2, idHacia);
@@ -158,30 +166,29 @@ public class InventarioDB {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             return false;
-        } finally {
-            try { conn.setAutoCommit(true); } catch (SQLException ex) { ex.printStackTrace(); }
         }
     }
 
     // === Métodos auxiliares ===
     private static int obtenerIdEquipo(String nombre, Connection conn) throws SQLException {
         String sql = "SELECT id_equipo FROM equipo WHERE nombre = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nombre);
-            if (rs.next()) return rs.getInt("id_equipo");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id_equipo");
+            }
         }
         throw new SQLException("Equipo no encontrado: " + nombre);
     }
 
     private static int obtenerIdSucursal(String nombre, Connection conn) throws SQLException {
         String sql = "SELECT id_sucursal FROM sucursal WHERE nombre = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nombre);
-            if (rs.next()) return rs.getInt("id_sucursal");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id_sucursal");
+            }
         }
         throw new SQLException("Sucursal no encontrada: " + nombre);
     }
@@ -199,7 +206,8 @@ public class InventarioDB {
             ORDER BY t.fecha DESC;
         """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {

@@ -133,6 +133,7 @@ public class NuevoEmpleadoPanel extends JPanel {
             limpiarCampos();
             volverEmpleados();
             empleadosPanel.cargarEmpleados(); // refrescar tabla
+            administradorPanel.showInicioEmpleados();
         } else {
             JOptionPane.showMessageDialog(this, "Error al registrar empleado");
         }

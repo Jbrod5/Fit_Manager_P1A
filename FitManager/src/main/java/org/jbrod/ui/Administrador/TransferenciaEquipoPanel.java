@@ -15,8 +15,13 @@ public class TransferenciaEquipoPanel extends JPanel {
     private JComboBox<String> comboHacia;
     private JTextField txtCantidad;
 
-    public TransferenciaEquipoPanel(AdministradorPanel administradorPanel) {
+    private  InventarioPanel inventarioPanel;
+
+    public TransferenciaEquipoPanel(AdministradorPanel administradorPanel, InventarioPanel inventarioPanel) {
         this.administradorPanel = administradorPanel;
+        this.inventarioPanel = inventarioPanel;
+
+
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -67,14 +72,17 @@ public class TransferenciaEquipoPanel extends JPanel {
             boolean ok = InventarioDB.transferirEquipo(equipo, desde, hacia, cantidad);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "Transferencia realizada con éxito");
+                inventarioPanel.cargarDatos();
                 administradorPanel.showInicioInventario();
             } else {
                 JOptionPane.showMessageDialog(this, "Error en la transferencia", "Error", JOptionPane.ERROR_MESSAGE);
+                inventarioPanel.cargarDatos();
+                administradorPanel.showInicioInventario();
             }
         });
 
         // Acción volver
-        btnVolver.addActionListener(e -> administradorPanel.showInicioInventario());
+        btnVolver.addActionListener(e -> {inventarioPanel.cargarDatos(); inventarioPanel.cargarDatos(); administradorPanel.showInicioInventario();});
     }
 
     private void cargarDatos() {

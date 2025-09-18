@@ -15,8 +15,11 @@ public class AgregarEquipoPanel extends JPanel {
     private JButton btnCancelar;
     private JButton btnGuardar;
 
-    public AgregarEquipoPanel(AdministradorPanel administradorPanel) {
+    InventarioPanel inventarioPanel;
+
+    public AgregarEquipoPanel(AdministradorPanel administradorPanel, InventarioPanel inventarioPanel) {
         this.administradorPanel = administradorPanel;
+        this.inventarioPanel = inventarioPanel;
 
         setLayout(new BorderLayout());
 
@@ -78,7 +81,10 @@ public class AgregarEquipoPanel extends JPanel {
             txtNombre.setText("");
             txtDescripcion.setText("");
 
+
+            inventarioPanel.cargarDatos();
             administradorPanel.showInicioInventario();
+
         } else {
             JOptionPane.showMessageDialog(this, "Error al registrar el equipo", "Error", JOptionPane.ERROR_MESSAGE);
         }
