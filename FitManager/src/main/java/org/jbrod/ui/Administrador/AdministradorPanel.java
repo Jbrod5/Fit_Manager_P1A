@@ -64,7 +64,7 @@ public class AdministradorPanel extends JPanel {
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    private void showView(String name) {
+    public void showView(String name) {
         CardLayout cl = (CardLayout) contentPanel.getLayout();
         cl.show(contentPanel, name);
     }

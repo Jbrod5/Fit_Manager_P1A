@@ -7,195 +7,143 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EmpleadosPanel extends JPanel {
 
+    private JTextField txtBusqueda;
     private JTable tablaEmpleados;
     private DefaultTableModel modeloTabla;
     private JButton btnNuevoEmpleado;
-    private EmpleadoDB empleadoDB;  // DAO para traer empleados
+    private JButton btnEditar;
+    private JButton btnEliminar;
 
+    private EmpleadoDB empleadoDB;
     private AdministradorPanel administradorPanel;
+
+    private List<Empleado> listaEmpleados; // Para filtrado
 
     public EmpleadosPanel(AdministradorPanel administradorPanel) {
         this.administradorPanel = administradorPanel;
-        setLayout(new BorderLayout());
-
         empleadoDB = new EmpleadoDB();
+        setLayout(new BorderLayout(10,10));
 
-        // === Botón nuevo empleado ===
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnNuevoEmpleado = new JButton("Nuevo empleado");
-        btnNuevoEmpleado.addActionListener(e -> {
-            Container parent = EmpleadosPanel.this.getParent(); // debería ser contentPanel
-            while (parent != null && !(parent instanceof AdministradorPanel)) {
-                parent = parent.getParent();
-            }
-
-            if (parent != null) {
-                AdministradorPanel adminPanel = (AdministradorPanel) parent;
-
-                // Crear el panel de nuevo empleado y agregarlo a contentPanel si no existe
-                NuevoEmpleadoPanel nuevoPanel = new NuevoEmpleadoPanel(adminPanel, EmpleadosPanel.this);
-                adminPanel.getContentPanel().add(nuevoPanel, "NuevoEmpleado");
-
-                // Mostrar el panel de nuevo empleado
-                CardLayout cl = (CardLayout) adminPanel.getContentPanel().getLayout();
-                cl.show(adminPanel.getContentPanel(), "NuevoEmpleado");
-            } else {
-                JOptionPane.showMessageDialog(null, "No se pudo abrir el panel de nuevo empleado.");
-            }
+        // === Panel superior: Barra de búsqueda ===
+        JPanel busquedaPanel = new JPanel(new BorderLayout(5,5));
+        busquedaPanel.add(new JLabel("Buscar por nombre, usuario o correo:"), BorderLayout.WEST);
+        txtBusqueda = new JTextField();
+        txtBusqueda.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
         });
+        busquedaPanel.add(txtBusqueda, BorderLayout.CENTER);
+        add(busquedaPanel, BorderLayout.NORTH);
 
-        topPanel.add(btnNuevoEmpleado);
-        add(topPanel, BorderLayout.NORTH);
-
-        // === Tabla de empleados ===
-        String[] columnas = {"ID", "Nombre", "Usuario", "Rol", "Sucursal", "Editar", "Eliminar"};
-        modeloTabla = new DefaultTableModel(columnas, 0) {
+        // === Tabla empleados ===
+        String[] columnas = {"ID", "Nombre", "Usuario", "Rol", "Sucursal"};
+        modeloTabla = new DefaultTableModel(columnas,0) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 5 || column == 6;
-            }
+            public boolean isCellEditable(int row, int column) { return false; }
         };
 
         tablaEmpleados = new JTable(modeloTabla);
-        tablaEmpleados.setRowHeight(30);
-
-        // === Cargar empleados desde la BD ===
-        cargarEmpleados();
-
-        // === Renderizar botones en la tabla ===
-        agregarBotones();
-
+        tablaEmpleados.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaEmpleados.setRowHeight(25);
         add(new JScrollPane(tablaEmpleados), BorderLayout.CENTER);
+
+        // === Panel inferior: botones ===
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Nuevo empleado a la izquierda
+        JPanel nuevoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnNuevoEmpleado = new JButton("Nuevo empleado");
+        btnNuevoEmpleado.addActionListener(e -> abrirNuevoEmpleado());
+        nuevoPanel.add(btnNuevoEmpleado);
+        bottomPanel.add(nuevoPanel, BorderLayout.WEST);
+
+        // Editar y Eliminar a la derecha
+        JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
+        btnEditar = new JButton("Editar");
+        btnEliminar = new JButton("Eliminar");
+
+        btnEditar.addActionListener(e -> editarEmpleado());
+        btnEliminar.addActionListener(e -> eliminarEmpleado());
+
+        accionesPanel.add(btnEditar);
+        accionesPanel.add(btnEliminar);
+        bottomPanel.add(accionesPanel, BorderLayout.EAST);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Cargar empleados inicial
+        cargarEmpleados();
     }
 
     public void cargarEmpleados() {
-        try {
-            if (tablaEmpleados.isEditing()) {
-                tablaEmpleados.getCellEditor().stopCellEditing();
-            }
+        listaEmpleados = empleadoDB.obtenerTodos();
+        actualizarTabla(listaEmpleados);
+    }
 
-            List<Empleado> empleados = empleadoDB.obtenerTodos();
-            modeloTabla.setRowCount(0); // limpiar
-            for (Empleado emp : empleados) {
-                modeloTabla.addRow(new Object[]{
-                        emp.getId_empleado(),
-                        emp.getNombre(),
-                        emp.getUsuario(),
-                        emp.getNombreRol(),
-                        emp.getNombreSucursal(),
-                        "Editar",
-                        "Eliminar"
-                });
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Error al cargar empleados: " + e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+    private void actualizarTabla(List<Empleado> empleados) {
+        modeloTabla.setRowCount(0);
+        for (Empleado emp : empleados) {
+            modeloTabla.addRow(new Object[]{
+                    emp.getId_empleado(),
+                    emp.getNombre(),
+                    emp.getUsuario(),
+                    emp.getNombreRol(),
+                    emp.getNombreSucursal()
+            });
         }
     }
 
-
-    private void agregarBotones() {
-        tablaEmpleados.getColumn("Editar").setCellRenderer(new BotonRenderer());
-        tablaEmpleados.getColumn("Eliminar").setCellRenderer(new BotonRenderer());
-
-        tablaEmpleados.getColumn("Editar").setCellEditor(new BotonEditor(new JCheckBox(), "Editar"));
-        tablaEmpleados.getColumn("Eliminar").setCellEditor(new BotonEditor(new JCheckBox(), "Eliminar"));
+    private void filtrar() {
+        String texto = txtBusqueda.getText().trim().toLowerCase();
+        List<Empleado> filtrados = listaEmpleados.stream()
+                .filter(emp -> emp.getNombre().toLowerCase().contains(texto)
+                        || emp.getUsuario().toLowerCase().contains(texto)
+                        || emp.getCorreo().toLowerCase().contains(texto))
+                .collect(Collectors.toList());
+        actualizarTabla(filtrados);
     }
 
-    // === Botón renderer ===
-    class BotonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
-        public BotonRenderer() {
-            setOpaque(true);
+    private Empleado obtenerEmpleadoSeleccionado() {
+        int fila = tablaEmpleados.getSelectedRow();
+        if(fila == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un empleado.", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
         }
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus,
-                                                       int row, int column) {
-            setText((value == null) ? "" : value.toString());
-            return this;
+        int id = (int) modeloTabla.getValueAt(fila, 0);
+        return empleadoDB.obtenerPorId(id);
+    }
+
+    private void abrirNuevoEmpleado() {
+        NuevoEmpleadoPanel nuevoPanel = new NuevoEmpleadoPanel(administradorPanel, this);
+        administradorPanel.getContentPanel().add(nuevoPanel, "NuevoEmpleado");
+        administradorPanel.showView("NuevoEmpleado");
+    }
+
+    private void editarEmpleado() {
+        Empleado emp = obtenerEmpleadoSeleccionado();
+        if(emp != null) {
+            EditarEmpleadoPanel editarPanel = new EditarEmpleadoPanel(administradorPanel, this, emp);
+            administradorPanel.getContentPanel().add(editarPanel, "EditarEmpleado");
+            administradorPanel.showView("EditarEmpleado");
         }
     }
 
-    // === Botón editor ===
-    class BotonEditor extends DefaultCellEditor {
-        private String label;
-        private JButton button;
-        private boolean clicked;
-
-        public BotonEditor(JCheckBox checkBox, String tipo) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(e -> fireEditingStopped());
-            this.label = tipo;
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                                                     boolean isSelected, int row, int column) {
-            button.setText(label);
-            clicked = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (clicked) {
-                int fila = tablaEmpleados.getSelectedRow();
-                int id = (int) modeloTabla.getValueAt(fila, 0);
-
-                if ("Editar".equals(label)) {
-                    Empleado emp = empleadoDB.obtenerPorId(id);
-
-                    if (emp != null) {
-                        AdministradorPanel adminPanel = null;
-                        Container parent = EmpleadosPanel.this.getParent();
-                        while (parent != null && !(parent instanceof AdministradorPanel)) {
-                            parent = parent.getParent();
-                        }
-                        if (parent != null) {
-                            adminPanel = (AdministradorPanel) parent;
-                        }
-
-                        if (adminPanel != null) {
-                            EditarEmpleadoPanel editarPanel = new EditarEmpleadoPanel(adminPanel, EmpleadosPanel.this, emp);
-                            adminPanel.getContentPanel().add(editarPanel, "EditarEmpleado");
-
-                            CardLayout cl = (CardLayout) adminPanel.getContentPanel().getLayout();
-                            cl.show(adminPanel.getContentPanel(), "EditarEmpleado");
-                        }
-
-                        } else {
-                            JOptionPane.showMessageDialog(null, "No se encontró el empleado.");
-                        }
-
-                    } else if ("Eliminar".equals(label)) {
-                    int confirm = JOptionPane.showConfirmDialog(null,
-                            "¿Seguro que deseas eliminar al empleado con ID: " + id + "?",
-                            "Confirmar eliminación",
-                            JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        empleadoDB.eliminar(id); // eliminar en BD
-                        cargarEmpleados(); // refrescar tabla
-                        administradorPanel.showInicioEmpleados();
-                    }
-
-                }
+    private void eliminarEmpleado() {
+        Empleado emp = obtenerEmpleadoSeleccionado();
+        if(emp != null) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "¿Seguro que deseas eliminar al empleado " + emp.getNombre() + "?",
+                    "Confirmar eliminación",
+                    JOptionPane.YES_NO_OPTION);
+            if(confirm == JOptionPane.YES_OPTION) {
+                empleadoDB.eliminar(emp.getId_empleado());
+                cargarEmpleados();
             }
-            clicked = false;
-            return label;
         }
-
-        @Override
-        public boolean stopCellEditing() {
-            clicked = false;
-            return super.stopCellEditing();
-        }
-
     }
 }

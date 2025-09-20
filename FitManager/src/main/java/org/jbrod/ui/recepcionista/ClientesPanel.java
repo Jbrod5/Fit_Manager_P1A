@@ -28,16 +28,7 @@ public class ClientesPanel extends JPanel {
         clientesDB = new ClientesDB();
         setLayout(new BorderLayout(10,10));
 
-        // === Panel superior: Botón nuevo cliente + búsqueda ===
-        JPanel panelSuperior = new JPanel(new GridLayout(2, 1, 5, 5));
-
-        // Botón nuevo cliente
-        JPanel topBotonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnNuevoCliente = new JButton("Nuevo cliente");
-        btnNuevoCliente.addActionListener(e -> abrirAgregarCliente());
-        topBotonPanel.add(btnNuevoCliente);
-
-        // Barra de búsqueda
+        // === Panel superior: Barra de búsqueda ===
         JPanel busquedaPanel = new JPanel(new BorderLayout(5,5));
         busquedaPanel.add(new JLabel("Buscar por nombre o correo:"), BorderLayout.WEST);
         txtBusqueda = new JTextField();
@@ -48,10 +39,7 @@ public class ClientesPanel extends JPanel {
         });
         busquedaPanel.add(txtBusqueda, BorderLayout.CENTER);
 
-        panelSuperior.add(topBotonPanel);
-        panelSuperior.add(busquedaPanel);
-
-        add(panelSuperior, BorderLayout.NORTH);
+        add(busquedaPanel, BorderLayout.NORTH);
 
         // === Tabla clientes ===
         String[] columnas = {"ID", "Nombre", "Correo", "Fecha Registro"};
@@ -66,18 +54,29 @@ public class ClientesPanel extends JPanel {
 
         add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
 
-        // === Botones Editar y Eliminar debajo de la tabla ===
-        JPanel botonesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        // === Panel inferior: botones ===
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Nuevo cliente a la izquierda
+        JPanel nuevoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnNuevoCliente = new JButton("Nuevo cliente");
+        btnNuevoCliente.addActionListener(e -> abrirAgregarCliente());
+        nuevoPanel.add(btnNuevoCliente);
+        bottomPanel.add(nuevoPanel, BorderLayout.WEST);
+
+        // Editar y Eliminar a la derecha
+        JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         btnEditar = new JButton("Editar");
         btnEliminar = new JButton("Eliminar");
 
         btnEditar.addActionListener(e -> editarCliente());
         btnEliminar.addActionListener(e -> eliminarCliente());
 
-        botonesPanel.add(btnEditar);
-        botonesPanel.add(btnEliminar);
+        accionesPanel.add(btnEditar);
+        accionesPanel.add(btnEliminar);
+        bottomPanel.add(accionesPanel, BorderLayout.EAST);
 
-        add(botonesPanel, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
 
         // Cargar clientes inicial
         cargarClientes();
