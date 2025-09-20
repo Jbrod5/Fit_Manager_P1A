@@ -1,200 +1,149 @@
 package org.jbrod.ui.recepcionista;
 
 import org.jbrod.controller.ClientesDB;
-
 import org.jbrod.model.clientes_membresias.Cliente;
-import org.jbrod.ui.recepcionista.RecepcionistaPanel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClientesPanel extends JPanel {
+
+    private JTextField txtBusqueda;
     private JTable tablaClientes;
     private DefaultTableModel modeloTabla;
     private JButton btnNuevoCliente;
-    private ClientesDB clientesDB;
+    private JButton btnEditar;
+    private JButton btnEliminar;
 
+    private ClientesDB clientesDB;
     private RecepcionistaPanel recepcionistaPanel;
+
+    private List<Cliente> listaClientes; // Para filtrado
 
     public ClientesPanel(RecepcionistaPanel recepcionistaPanel) {
         this.recepcionistaPanel = recepcionistaPanel;
-        setLayout(new BorderLayout());
-
         clientesDB = new ClientesDB();
+        setLayout(new BorderLayout(10,10));
 
-        // === Botón nuevo cliente ===
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // === Panel superior: Botón nuevo cliente + búsqueda ===
+        JPanel panelSuperior = new JPanel(new GridLayout(2, 1, 5, 5));
+
+        // Botón nuevo cliente
+        JPanel topBotonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnNuevoCliente = new JButton("Nuevo cliente");
-        btnNuevoCliente.addActionListener(e -> {
-            Container parent = ClientesPanel.this.getParent();
-            while (parent != null && !(parent instanceof RecepcionistaPanel)) {
-                parent = parent.getParent();
-            }
+        btnNuevoCliente.addActionListener(e -> abrirAgregarCliente());
+        topBotonPanel.add(btnNuevoCliente);
 
-            if (parent != null) {
-                //RecepcionistaPanel recPanel = (RecepcionistaPanel) parent;
-                //NuevoClientePanel nuevoPanel = new NuevoClientePanel(recPanel, ClientesPanel.this);
-                //recPanel.getContentPanel().add(nuevoPanel, "NuevoCliente");
-
-                //CardLayout cl = (CardLayout) recPanel.getContentPanel().getLayout();
-                //cl.show(recPanel.getContentPanel(), "NuevoCliente");
-
-
-                AgregarClientePanel agregarClientePanel = new AgregarClientePanel(recepcionistaPanel, this);
-                recepcionistaPanel.addView("Agregar cliente", agregarClientePanel);
-                recepcionistaPanel.showView("Agregar cliente");
-            } else {
-                JOptionPane.showMessageDialog(null, "No se pudo abrir el panel de nuevo cliente.");
-            }
+        // Barra de búsqueda
+        JPanel busquedaPanel = new JPanel(new BorderLayout(5,5));
+        busquedaPanel.add(new JLabel("Buscar por nombre o correo:"), BorderLayout.WEST);
+        txtBusqueda = new JTextField();
+        txtBusqueda.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
         });
+        busquedaPanel.add(txtBusqueda, BorderLayout.CENTER);
 
-        topPanel.add(btnNuevoCliente);
-        add(topPanel, BorderLayout.NORTH);
+        panelSuperior.add(topBotonPanel);
+        panelSuperior.add(busquedaPanel);
 
-        // === Tabla de clientes ===
-        String[] columnas = {"ID", "Nombre", "Correo", "Fecha Registro", "Editar", "Eliminar"};
-        modeloTabla = new DefaultTableModel(columnas, 0) {
+        add(panelSuperior, BorderLayout.NORTH);
+
+        // === Tabla clientes ===
+        String[] columnas = {"ID", "Nombre", "Correo", "Fecha Registro"};
+        modeloTabla = new DefaultTableModel(columnas,0) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 4 || column == 5;
-            }
+            public boolean isCellEditable(int row, int column) { return false; }
         };
 
         tablaClientes = new JTable(modeloTabla);
-        tablaClientes.setRowHeight(30);
-
-        // === Cargar clientes desde la BD ===
-        cargarClientes();
-
-        // === Renderizar botones ===
-        agregarBotones();
+        tablaClientes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaClientes.setRowHeight(25);
 
         add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+
+        // === Botones Editar y Eliminar debajo de la tabla ===
+        JPanel botonesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        btnEditar = new JButton("Editar");
+        btnEliminar = new JButton("Eliminar");
+
+        btnEditar.addActionListener(e -> editarCliente());
+        btnEliminar.addActionListener(e -> eliminarCliente());
+
+        botonesPanel.add(btnEditar);
+        botonesPanel.add(btnEliminar);
+
+        add(botonesPanel, BorderLayout.SOUTH);
+
+        // Cargar clientes inicial
+        cargarClientes();
+    }
+
+    private void abrirAgregarCliente() {
+        AgregarClientePanel agregarClientePanel = new AgregarClientePanel(recepcionistaPanel, this);
+        recepcionistaPanel.addView("Agregar cliente", agregarClientePanel);
+        recepcionistaPanel.showView("Agregar cliente");
     }
 
     public void cargarClientes() {
-        try {
-            if (tablaClientes.isEditing()) {
-                tablaClientes.getCellEditor().stopCellEditing();
-            }
+        listaClientes = clientesDB.obtenerTodos();
+        actualizarTabla(listaClientes);
+    }
 
-            List<Cliente> clientes = clientesDB.obtenerTodos();
-            modeloTabla.setRowCount(0);
-
-            for (Cliente c : clientes) {
-                modeloTabla.addRow(new Object[]{
-                        c.getIdCliente(),
-                        c.getNombre(),
-                        c.getCorreo(),
-                        c.getFechaRegistro(),
-                        "Editar",
-                        "Eliminar"
-                });
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Error al cargar clientes: " + e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+    private void actualizarTabla(List<Cliente> clientes) {
+        modeloTabla.setRowCount(0);
+        for (Cliente c : clientes) {
+            modeloTabla.addRow(new Object[]{
+                    c.getIdCliente(),
+                    c.getNombre(),
+                    c.getCorreo(),
+                    c.getFechaRegistro()
+            });
         }
     }
 
-    private void agregarBotones() {
-        tablaClientes.getColumn("Editar").setCellRenderer(new BotonRenderer());
-        tablaClientes.getColumn("Eliminar").setCellRenderer(new BotonRenderer());
-
-        tablaClientes.getColumn("Editar").setCellEditor(new BotonEditor(new JCheckBox(), "Editar"));
-        tablaClientes.getColumn("Eliminar").setCellEditor(new BotonEditor(new JCheckBox(), "Eliminar"));
+    private void filtrar() {
+        String texto = txtBusqueda.getText().trim().toLowerCase();
+        List<Cliente> filtrados = listaClientes.stream()
+                .filter(c -> c.getNombre().toLowerCase().contains(texto) || c.getCorreo().toLowerCase().contains(texto))
+                .collect(Collectors.toList());
+        actualizarTabla(filtrados);
     }
 
-    // === Botón renderer ===
-    class BotonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
-        public BotonRenderer() {
-            setOpaque(true);
+    private Cliente obtenerClienteSeleccionado() {
+        int fila = tablaClientes.getSelectedRow();
+        if(fila == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
         }
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus,
-                                                       int row, int column) {
-            setText((value == null) ? "" : value.toString());
-            return this;
+        int id = (int) modeloTabla.getValueAt(fila, 0);
+        return clientesDB.obtenerPorId(id);
+    }
+
+    private void editarCliente() {
+        Cliente cliente = obtenerClienteSeleccionado();
+        if(cliente != null) {
+            EditarClientePanel editarPanel = new EditarClientePanel(recepcionistaPanel, this, cliente);
+            recepcionistaPanel.addView("Editar cliente", editarPanel);
+            recepcionistaPanel.showView("Editar cliente");
         }
     }
 
-    // === Botón editor ===
-    class BotonEditor extends DefaultCellEditor {
-        private String label;
-        private JButton button;
-        private boolean clicked;
-
-        public BotonEditor(JCheckBox checkBox, String tipo) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(e -> fireEditingStopped());
-            this.label = tipo;
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                                                     boolean isSelected, int row, int column) {
-            button.setText(label);
-            clicked = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (clicked) {
-                int fila = tablaClientes.getSelectedRow();
-                int id = (int) modeloTabla.getValueAt(fila, 0);
-
-                if ("Editar".equals(label)) {
-                    Cliente cliente = clientesDB.obtenerPorId(id);
-
-                    if (cliente != null) {
-                        RecepcionistaPanel recPanel = null;
-                        Container parent = ClientesPanel.this.getParent();
-                        while (parent != null && !(parent instanceof RecepcionistaPanel)) {
-                            parent = parent.getParent();
-                        }
-                        if (parent != null) {
-                            recPanel = (RecepcionistaPanel) parent;
-                        }
-
-                        if (recPanel != null) {
-                            EditarClientePanel editarPanel = new EditarClientePanel(recPanel, ClientesPanel.this, cliente);
-                            recPanel.getContentPanel().add(editarPanel, "EditarCliente");
-
-                            CardLayout cl = (CardLayout) recPanel.getContentPanel().getLayout();
-                            cl.show(recPanel.getContentPanel(), "EditarCliente");
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "No se encontró el cliente.");
-                    }
-
-                } else if ("Eliminar".equals(label)) {
-                    int confirm = JOptionPane.showConfirmDialog(null,
-                            "¿Seguro que deseas eliminar al cliente con ID: " + id + "?",
-                            "Confirmar eliminación",
-                            JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        clientesDB.eliminar(id);
-                        cargarClientes();
-                        recepcionistaPanel.showInicioClientes();
-                    }
-                }
+    private void eliminarCliente() {
+        Cliente cliente = obtenerClienteSeleccionado();
+        if(cliente != null) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "¿Seguro que deseas eliminar al cliente " + cliente.getNombre() + "?",
+                    "Confirmar eliminación",
+                    JOptionPane.YES_NO_OPTION);
+            if(confirm == JOptionPane.YES_OPTION) {
+                clientesDB.eliminar(cliente.getIdCliente());
+                cargarClientes();
             }
-            clicked = false;
-            return label;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            clicked = false;
-            return super.stopCellEditing();
         }
     }
 }
