@@ -90,12 +90,15 @@ public class MembresiasDB {
             }
 
             // Pago
-            stmtP.setInt(1, idCliente);
-            stmtP.setInt(2, idMembresia);
-            stmtP.setDouble(3, monto);
-            stmtP.setString(4, "Membresía");
-            stmtP.setString(5, "Pago automático al registrar membresía");
-            stmtP.executeUpdate();
+            //stmtP.setInt(1, idCliente);
+            //stmtP.setInt(2, idMembresia);
+            //stmtP.setDouble(3, monto);
+            //stmtP.setString(4, "Membresía");
+            //stmtP.setString(5, "Pago automático al registrar membresía");
+            //stmtP.executeUpdate();
+
+            //Registrar el pago
+            PagosDB.registrarPago(idCliente, idMembresia,100, "Membresia", "Pago automatico al registarr membresia");
 
             connection.commit();
             connection.setAutoCommit(true);
@@ -105,6 +108,10 @@ public class MembresiasDB {
             e.printStackTrace();
             return false;
         }
+
+
+
+
     }
 
     // === Obtener historial completo de membresías de un cliente ===

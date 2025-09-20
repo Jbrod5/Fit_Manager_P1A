@@ -14,6 +14,7 @@ public class HistorialMembresiasPanel extends JPanel {
     private JTable tablaHistorial;
     private DefaultTableModel modeloTabla;
     private JTextField txtBusqueda;
+    private JComboBox<String> comboFiltroTipo;
     private JButton btnVolver;
 
     private RecepcionistaPanel recepcionistaPanel;
@@ -24,18 +25,39 @@ public class HistorialMembresiasPanel extends JPanel {
 
         setLayout(new BorderLayout(10, 10));
 
-        // === Panel superior: búsqueda ===
+        // === Panel superior: búsqueda y filtro ===
         JPanel panelSuperior = new JPanel(new BorderLayout(5, 5));
-        panelSuperior.add(new JLabel("Buscar por nombre o correo:"), BorderLayout.WEST);
 
+        // Panel de filtros internos (grid para alinear ambos)
+        JPanel panelFiltros = new JPanel(new GridLayout(1, 2, 5, 0));
+
+        // Buscar por nombre/correo
+        JPanel panelBusqueda = new JPanel(new BorderLayout(5, 5));
+        panelBusqueda.add(new JLabel("Buscar (nombre/correo):"), BorderLayout.WEST);
         txtBusqueda = new JTextField();
         txtBusqueda.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
             public void insertUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
         });
-        panelSuperior.add(txtBusqueda, BorderLayout.CENTER);
+        panelBusqueda.add(txtBusqueda, BorderLayout.CENTER);
 
+        // Filtro por tipo de membresía
+        JPanel panelTipo = new JPanel(new BorderLayout(5, 5));
+        panelTipo.add(new JLabel("Tipo Membresía:"), BorderLayout.WEST);
+        comboFiltroTipo = new JComboBox<>();
+        comboFiltroTipo.addItem("Todos"); // opción general
+        comboFiltroTipo.addItem("Basica");
+        comboFiltroTipo.addItem("Premium");
+        comboFiltroTipo.addItem("VIP");
+        comboFiltroTipo.addActionListener(e -> filtrar());
+        panelTipo.add(comboFiltroTipo, BorderLayout.CENTER);
+
+        // Añadir ambos al panel de filtros
+        panelFiltros.add(panelBusqueda);
+        panelFiltros.add(panelTipo);
+
+        panelSuperior.add(panelFiltros, BorderLayout.CENTER);
         add(panelSuperior, BorderLayout.NORTH);
 
         // === Tabla historial ===
@@ -77,10 +99,15 @@ public class HistorialMembresiasPanel extends JPanel {
 
     private void filtrar() {
         String texto = txtBusqueda.getText().trim().toLowerCase();
+        String tipoSeleccionado = (String) comboFiltroTipo.getSelectedItem();
+
         List<MembresiaCliente> filtrados = historialCompleto.stream()
-                .filter(m -> m.getNombreCliente().toLowerCase().contains(texto)
-                        || m.getCorreoCliente().toLowerCase().contains(texto))
+                .filter(m -> (m.getNombreCliente().toLowerCase().contains(texto)
+                        || m.getCorreoCliente().toLowerCase().contains(texto)))
+                .filter(m -> tipoSeleccionado.equals("Todos")
+                        || m.getNombreTipoMembresia().equalsIgnoreCase(tipoSeleccionado))
                 .collect(Collectors.toList());
+
         actualizarTabla(filtrados);
     }
 }

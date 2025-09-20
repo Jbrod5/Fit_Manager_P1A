@@ -15,6 +15,8 @@ public class ClientesPanel extends JPanel {
     private JTable tablaClientes;
     private DefaultTableModel modeloTabla;
     private JButton btnNuevoCliente;
+
+    private JButton btnCrearPago;
     private JButton btnEditar;
     private JButton btnEliminar;
 
@@ -64,14 +66,18 @@ public class ClientesPanel extends JPanel {
         nuevoPanel.add(btnNuevoCliente);
         bottomPanel.add(nuevoPanel, BorderLayout.WEST);
 
-        // Editar y Eliminar a la derecha
+        // Crear pago, Editar y Eliminar a la derecha
         JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         btnEditar = new JButton("Editar");
         btnEliminar = new JButton("Eliminar");
+        btnCrearPago = new JButton("Crear un pago");
 
         btnEditar.addActionListener(e -> editarCliente());
         btnEliminar.addActionListener(e -> eliminarCliente());
+        btnCrearPago.addActionListener(e -> crearPago());
 
+
+        accionesPanel.add(btnCrearPago);
         accionesPanel.add(btnEditar);
         accionesPanel.add(btnEliminar);
         bottomPanel.add(accionesPanel, BorderLayout.EAST);
@@ -143,6 +149,16 @@ public class ClientesPanel extends JPanel {
                 clientesDB.eliminar(cliente.getIdCliente());
                 cargarClientes();
             }
+        }
+    }
+
+    private void crearPago(){
+        Cliente cliente = obtenerClienteSeleccionado();
+        if(cliente != null) {
+
+            CrearPagoPanel crearPagoPanel = new CrearPagoPanel(recepcionistaPanel, cliente.getIdCliente(), cliente.getNombre(), cliente.getCorreo());
+            recepcionistaPanel.addView("Crear pago", crearPagoPanel);
+            recepcionistaPanel.showView("Crear pago");
         }
     }
 }

@@ -167,7 +167,7 @@ CREATE TABLE rutina_cliente(
 CREATE TABLE pago (
     id_pago SERIAL PRIMARY KEY,
     id_cliente INT REFERENCES cliente(id_cliente) ON DELETE CASCADE,
-    id_membresia INT REFERENCES membresia_cliente(id_membresia_cliente)ON DELETE CASCADE,
+    id_membresia INT REFERENCES membresia_cliente(id_membresia_cliente)ON DELETE CASCADE NULL,
     monto DECIMAL(10,2),
     fecha_pago DATE DEFAULT CURRENT_DATE,
     tipo_servicio VARCHAR(50),
