@@ -129,8 +129,29 @@ def crear_empleados(cur, sucursales):
     cur.execute(
         "INSERT INTO empleado (id_sucursal, nombre, correo, telefono, rol, usuario, passwrd) "
         "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id_empleado",
-        (sucursales['Central'], 'Administrador Principal', 'admin@fitmanager.com', 0,
+        (sucursales['Central'], 'Administrador Principal', 'admin@fitmanager.com', 435234,
          roles['Administrador'], 'admin', encrypt('admin', 'admin123'))
+    )
+    # Inventario fijo
+    cur.execute(
+        "INSERT INTO empleado (id_sucursal, nombre, correo, telefono, rol, usuario, passwrd) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id_empleado",
+        (sucursales['Central'], 'Inventario fijo', 'inv@fitmanager.com', 2141241,
+         roles['Inventario'], 'inventario', encrypt('inventario', '12345'))
+    )
+    # Recepcionista fijo
+    cur.execute(
+        "INSERT INTO empleado (id_sucursal, nombre, correo, telefono, rol, usuario, passwrd) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id_empleado",
+        (sucursales['Central'], 'Recepcionista fijo', 'rec@fitmanager.com', 534523,
+         roles['Recepcionista'], 'recepcion', encrypt('recepcion', '12345'))
+    )
+    # Entrenador fijo
+    cur.execute(
+        "INSERT INTO empleado (id_sucursal, nombre, correo, telefono, rol, usuario, passwrd) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id_empleado",
+        (sucursales['Central'], 'Entrenador fijo', 'ent@fitmanager.com', 543523,
+         roles['Entrenador'], 'entrenador', encrypt('entrenador', '12345'))
     )
 
     # Resto de empleados
