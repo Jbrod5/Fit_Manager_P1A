@@ -145,4 +145,73 @@ public class MembresiasDB {
 
         return lista;
     }
+
+    // Obtener todos los nombres de tipos de membresía
+    public static List<String> obtenerTiposMembresia() {
+        List<String> lista = new ArrayList<>();
+        String sql = "SELECT nombre_membresia FROM tipo_membresia_cliente ORDER BY id_tipo_membresia";
+
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while(rs.next()) {
+                lista.add(rs.getString("nombre_membresia"));
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // Obtener id por nombre
+    public static int obtenerIdTipoMembresiaPorNombre(String nombre) {
+        String sql = "SELECT id_tipo_membresia FROM tipo_membresia_cliente WHERE nombre_membresia = ?";
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nombre);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) return rs.getInt("id_tipo_membresia");
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    // === Obtener historial completo de todas las membresías (todos los clientes) ===
+    public static List<MembresiaCliente> obtenerHistorialMembresiasTodos() {
+        List<MembresiaCliente> lista = new ArrayList<>();
+        String sql = """
+        SELECT mc.id_membresia_cliente, c.id_cliente, c.nombre, c.correo,
+               tmc.id_tipo_membresia, tmc.nombre_membresia, mc.fecha_inicio, mc.fecha_fin
+        FROM membresia_cliente mc
+        JOIN cliente c ON mc.id_cliente = c.id_cliente
+        JOIN tipo_membresia_cliente tmc ON mc.id_tipo_membresia = tmc.id_tipo_membresia
+        ORDER BY mc.fecha_inicio DESC
+    """;
+
+        try (Connection connection = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(new MembresiaCliente(
+                        rs.getInt("id_membresia_cliente"),
+                        rs.getInt("id_cliente"),
+                        rs.getString("nombre"),
+                        rs.getString("correo"),
+                        rs.getInt("id_tipo_membresia"),
+                        rs.getString("nombre_membresia"),
+                        rs.getDate("fecha_inicio").toLocalDate(),
+                        rs.getDate("fecha_fin").toLocalDate()
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
+
 }
