@@ -1,5 +1,6 @@
 package org.jbrod.controller;
 
+import org.jbrod.model.clientes_membresias.EntrenadorAsignacionHistorial;
 import org.jbrod.model.empleados.Empleado;
 import org.jbrod.util.DBConnectionSingleton;
 
@@ -91,5 +92,50 @@ public class EntrenadorDB {
             ex.printStackTrace();
             return false;
         }
+    }
+
+
+    // Obtener historial completo o filtrado por cliente
+    public static List<EntrenadorAsignacionHistorial> obtenerHistorial(String filtroCliente) {
+        List<EntrenadorAsignacionHistorial> lista = new ArrayList<>();
+        String sql = """
+            SELECT h.id_cliente, c.nombre AS nombre_cliente, c.correo AS correo_cliente,
+                           h.id_entrenador, e.nombre AS nombre_entrenador, e.correo AS correo_entrenador,
+                           h.fecha_asignacion, s.nombre AS nombre_sucursal
+                    FROM historial_asignaciones_entrenador h
+                    JOIN cliente c ON h.id_cliente = c.id_cliente
+                    JOIN empleado e ON h.id_entrenador = e.id_empleado
+                    JOIN sucursal s ON e.id_sucursal = s.id_sucursal
+                    WHERE c.nombre ILIKE ? OR c.correo ILIKE ?
+                    ORDER BY h.fecha_asignacion DESC
+                
+        """;
+
+        try (Connection conn = DBConnectionSingleton.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            String filtro = "%" + (filtroCliente != null ? filtroCliente.toLowerCase() : "") + "%";
+            ps.setString(1, filtro);
+            ps.setString(2, filtro);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                lista.add(new EntrenadorAsignacionHistorial(
+                        rs.getInt("id_cliente"),
+                        rs.getString("nombre_cliente"),
+                        rs.getString("correo_cliente"),
+                        rs.getInt("id_entrenador"),
+                        rs.getString("nombre_entrenador"),
+                        rs.getString("correo_entrenador"),
+                        rs.getDate("fecha_asignacion"),
+                        rs.getString("nombre_sucursal")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return lista;
     }
 }

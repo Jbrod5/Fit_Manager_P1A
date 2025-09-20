@@ -103,6 +103,7 @@ public class LoginPanel extends JPanel{
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error al conectarse con la base de datos");
         } catch (NullPointerException n){
+            n.printStackTrace();
             JOptionPane.showMessageDialog(this, "Credenciales invalidas.");
 
         }

@@ -35,8 +35,11 @@ public class MembresiaCliente {
     public LocalDate getFechaFin() { return fechaFin; }
 
     public boolean isActiva() {
+        if (fechaInicio == null || fechaFin == null) {
+            return false;
+        }
         LocalDate hoy = LocalDate.now();
-        return (hoy.isEqual(fechaInicio) || hoy.isAfter(fechaInicio)) &&
-                (hoy.isBefore(fechaFin) || hoy.isEqual(fechaFin));
+        return !hoy.isBefore(fechaInicio) && !hoy.isAfter(fechaFin);
     }
+
 }

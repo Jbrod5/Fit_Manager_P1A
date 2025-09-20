@@ -11,7 +11,7 @@ public class VentanaPrincipal extends JFrame {
     public VentanaPrincipal() {
         //Configuraciones de la ventana :3
         setTitle(nombreVentana);
-        setSize(800, 600);
+        setSize(850, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 

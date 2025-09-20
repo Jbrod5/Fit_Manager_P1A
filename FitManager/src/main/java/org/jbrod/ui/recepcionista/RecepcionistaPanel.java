@@ -37,11 +37,13 @@ public class RecepcionistaPanel extends JPanel {
         JButton btnMembresias = new JButton("Membresias");
         JButton btnAsistencias = new JButton("Asistencias");
         JButton btnPagos = new JButton("Pagos");
+        JButton btnHistorialEntrenadores = new JButton("Historial de asignaciones de entrenadores");
 
         navButtons.add(btnClientes);
         navButtons.add(btnMembresias);
         navButtons.add(btnAsistencias);
         navButtons.add(btnPagos);
+        navButtons.add(btnHistorialEntrenadores);
 
         // 🔹 Botón de cerrar sesión (lado derecho)
         JButton btnCerrarSesion = new JButton("Cerrar sesión");
@@ -55,6 +57,7 @@ public class RecepcionistaPanel extends JPanel {
         contentPanel.add(new MembresiasPanel(this) , "Membresias");
         contentPanel.add(new AsistenciasPanel(this), "Asistencias");
         contentPanel.add(new PagosPanel(), "Pagos");
+        contentPanel.add(new HistorialAsignacionEntrenadoresPanel(this), "Historial asignaciones entrenadores");
         //contentPanel.add(new EmpleadosPanel(this), "Empleados");
         //contentPanel.add(new InventarioPanel(this), "Inventario");
 
@@ -63,6 +66,7 @@ public class RecepcionistaPanel extends JPanel {
         btnMembresias.addActionListener((ActionEvent e) -> showView("Membresias"));
         btnAsistencias.addActionListener((ActionEvent e) -> showView("Asistencias"));
         btnPagos.addActionListener((ActionEvent e) -> showView("Pagos"));
+        btnHistorialEntrenadores.addActionListener((ActionEvent e) -> showHistorialAsignacionEntrenadores());
 
         btnCerrarSesion.addActionListener((ActionEvent e) -> {
             //JOptionPane.showMessageDialog(this, "Cerrando sesión...");
@@ -96,6 +100,11 @@ public class RecepcionistaPanel extends JPanel {
     public void showPagos() {
         contentPanel.add(new PagosPanel(), "Pagos");
         showView("Pagos");
+    }
+
+    public void showHistorialAsignacionEntrenadores(){
+        contentPanel.add(new HistorialAsignacionEntrenadoresPanel(this), "Historial asignaciones entrenadores");
+        showView("Historial asignaciones entrenadores");
     }
 
 
