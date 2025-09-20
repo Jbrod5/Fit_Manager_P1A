@@ -53,7 +53,7 @@ public class RecepcionistaPanel extends JPanel {
         contentPanel = new JPanel(new CardLayout());
         contentPanel.add(new ClientesPanel(this), "Clientes");
         contentPanel.add(new JLabel("Bienvenido recepcionista: Membresias" + emp.getNombre(), SwingConstants.CENTER), "Membresias");
-        contentPanel.add(new JLabel("Bienvenido recepcionista: Asistencias" + emp.getNombre(), SwingConstants.CENTER), "Asistencias");
+        contentPanel.add(new AsistenciasPanel(this), "Asistencias");
         contentPanel.add(new JLabel("Bienvenido recepcionista: Pagos" + emp.getNombre(), SwingConstants.CENTER), "Pagos");
         //contentPanel.add(new EmpleadosPanel(this), "Empleados");
         //contentPanel.add(new InventarioPanel(this), "Inventario");
@@ -85,6 +85,13 @@ public class RecepcionistaPanel extends JPanel {
     public void showInicioClientes(){
         showView("Clientes");
     }
+
+    public void showAsistencias(){
+        showView("Asistencias");
+    }
+
+
+
 
 
 
