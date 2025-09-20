@@ -15,7 +15,14 @@ public class ClientesDB {
     // === Obtener todos los clientes ===
     public List<Cliente> obtenerTodos() {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT id_cliente, nombre, correo, fecha_registro FROM cliente ORDER BY id_cliente";
+        String sql = """
+        SELECT c.id_cliente, c.nombre, c.correo, c.fecha_registro,
+               e.nombre AS nombre_entrenador
+        FROM cliente c
+        LEFT JOIN asignacion_entrenador a ON c.id_cliente = a.id_cliente
+        LEFT JOIN empleado e ON a.id_entrenador = e.id_empleado
+        ORDER BY c.id_cliente
+    """;
 
         try (Connection connection = DBConnectionSingleton.getInstance().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql);
@@ -28,6 +35,7 @@ public class ClientesDB {
                         rs.getString("correo"),
                         rs.getTimestamp("fecha_registro")
                 );
+                c.setNombreEntrenador(rs.getString("nombre_entrenador")); // asignamos el entrenador
                 clientes.add(c);
             }
 
@@ -37,6 +45,7 @@ public class ClientesDB {
 
         return clientes;
     }
+
 
     // === Insertar cliente nuevo ===
     public boolean insertar(Cliente cliente) {

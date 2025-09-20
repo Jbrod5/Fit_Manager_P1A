@@ -6,6 +6,7 @@ import org.jbrod.model.clientes_membresias.Cliente;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.AbstractSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ public class ClientesPanel extends JPanel {
     private DefaultTableModel modeloTabla;
     private JButton btnNuevoCliente;
 
+    private JButton btnAsignarEntrenador;
     private JButton btnCrearPago;
     private JButton btnEditar;
     private JButton btnEliminar;
@@ -44,8 +46,8 @@ public class ClientesPanel extends JPanel {
         add(busquedaPanel, BorderLayout.NORTH);
 
         // === Tabla clientes ===
-        String[] columnas = {"ID", "Nombre", "Correo", "Fecha Registro"};
-        modeloTabla = new DefaultTableModel(columnas,0) {
+        String[] columnas = {"ID", "Nombre", "Correo", "Fecha Registro", "Entrenador"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
@@ -66,17 +68,19 @@ public class ClientesPanel extends JPanel {
         nuevoPanel.add(btnNuevoCliente);
         bottomPanel.add(nuevoPanel, BorderLayout.WEST);
 
-        // Crear pago, Editar y Eliminar a la derecha
+        // Asignar entrenador, Crear pago, Editar y Eliminar a la derecha
         JPanel accionesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 0));
         btnEditar = new JButton("Editar");
         btnEliminar = new JButton("Eliminar");
         btnCrearPago = new JButton("Crear un pago");
+        btnAsignarEntrenador = new JButton("Asignar entrenador");
 
         btnEditar.addActionListener(e -> editarCliente());
         btnEliminar.addActionListener(e -> eliminarCliente());
         btnCrearPago.addActionListener(e -> crearPago());
+        btnAsignarEntrenador.addActionListener(e -> asignarEntrenador());
 
-
+        accionesPanel.add(btnAsignarEntrenador);
         accionesPanel.add(btnCrearPago);
         accionesPanel.add(btnEditar);
         accionesPanel.add(btnEliminar);
@@ -106,7 +110,8 @@ public class ClientesPanel extends JPanel {
                     c.getIdCliente(),
                     c.getNombre(),
                     c.getCorreo(),
-                    c.getFechaRegistro()
+                    c.getFechaRegistro(),
+                    c.getNombreEntrenador() != null ? c.getNombreEntrenador() : "" // si no tiene asignado
             });
         }
     }
@@ -160,5 +165,16 @@ public class ClientesPanel extends JPanel {
             recepcionistaPanel.addView("Crear pago", crearPagoPanel);
             recepcionistaPanel.showView("Crear pago");
         }
+    }
+
+
+    public void asignarEntrenador(){
+        Cliente cliente = obtenerClienteSeleccionado();
+        if(cliente != null) {
+            AsignarEntrenadorPanel asigaAsignarEntrenadorPanel= new AsignarEntrenadorPanel(recepcionistaPanel, cliente);
+            recepcionistaPanel.addView("Asignar entrenador", asigaAsignarEntrenadorPanel);
+            recepcionistaPanel.showView("Asignar entrenador");
+        }
+
     }
 }

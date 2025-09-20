@@ -7,6 +7,7 @@ public class Cliente {
     private String nombre;
     private String correo;
     private Timestamp fechaRegistro;
+    private String nombreEntrenador;
 
     // === Constructores ===
     public Cliente() {}
@@ -50,4 +51,10 @@ public class Cliente {
     public void setFechaRegistro(Timestamp fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
+
+
+    public String getNombreEntrenador() { return nombreEntrenador; }
+
+    public void setNombreEntrenador(String nombreEntrenador) { this.nombreEntrenador = nombreEntrenador; }
+
 }
