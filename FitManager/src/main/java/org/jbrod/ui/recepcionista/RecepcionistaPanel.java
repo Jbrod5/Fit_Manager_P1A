@@ -52,7 +52,7 @@ public class RecepcionistaPanel extends JPanel {
         // 🔹 Contenedor central con CardLayout
         contentPanel = new JPanel(new CardLayout());
         contentPanel.add(new ClientesPanel(this), "Clientes");
-        contentPanel.add(new JLabel("Bienvenido recepcionista: Membresias" + emp.getNombre(), SwingConstants.CENTER), "Membresias");
+        contentPanel.add(new MembresiasPanel(this) , "Membresias");
         contentPanel.add(new AsistenciasPanel(this), "Asistencias");
         contentPanel.add(new JLabel("Bienvenido recepcionista: Pagos" + emp.getNombre(), SwingConstants.CENTER), "Pagos");
         //contentPanel.add(new EmpleadosPanel(this), "Empleados");
@@ -90,6 +90,9 @@ public class RecepcionistaPanel extends JPanel {
         showView("Asistencias");
     }
 
+    public void showMembresias(){
+        showView("Membresias");
+    }
 
 
 
